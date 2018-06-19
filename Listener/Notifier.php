@@ -213,6 +213,7 @@ class Notifier
      * @param string $file
      * @param int    $line
      *
+     * @return bool
      * @throws ErrorException
      */
     public function handlePhpError($level, $message, $file, $line, $errcontext = null)
