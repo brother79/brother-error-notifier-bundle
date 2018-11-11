@@ -1,0 +1,20 @@
+parameters:
+    brother.error_notifier.listener.class: "Brother\ErrorNotifierBundle\Listener\Notifier"
+services:
+    brother.error_notifier.listener:
+        class: "%brother.error_notifier.listener.class%"
+        tags:
+            - { name: "pagerfanta.view", alias: "compas" }
+            - { name: "kernel.event_listener", event:"kernel.exception", method:"onKernelException", priority:"0" }
+            - { name: "kernel.event_listener", event:"kernel.request", method:"onKernelRequest", priority:"0" }
+            - { name: "kernel.event_listener", event:"console.exception", method:"onConsoleException", priority:"0" }
+            - { name: "kernel.event_listener", event:"console.command", method:"onConsoleCommand", priority:"0" }
+        arguments:
+            - '@mailer'
+            - '@templating'
+            - "%kernel.cache_dir%"
+            - "%brother.error_notifier.config%"
+    brother.error_notifier.dumpy_extension:
+        class: "Brother\ErrorNotifierBundle\Twig\DumpyTwigFilter"
+        tags:
+            - { name:"twig.extension" }
