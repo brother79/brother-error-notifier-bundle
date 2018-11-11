@@ -100,7 +100,7 @@ class Notifier {
         $this->filteredRequestParams = $config['filteredRequestParams'];
 
         if (!is_dir($this->errorsDir)) {
-            mkdir($this->errorsDir);
+            mkdir($this->errorsDir, 0777, true);
         }
     }
 
