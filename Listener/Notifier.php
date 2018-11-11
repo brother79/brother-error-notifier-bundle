@@ -26,8 +26,7 @@ use Symfony\Component\Templating\EngineInterface;
 /**
  * Notifier
  */
-class Notifier
-{
+class Notifier {
     /**
      * @var Swift_Mailer
      */
@@ -51,9 +50,9 @@ class Notifier
     private $ignoredClasses;
     private $ignoredPhpErrors;
     private $reportWarnings = false;
-    private $reportErrors   = false;
-    private $reportSilent   = false;
-    private $repeatTimeout  = false;
+    private $reportErrors = false;
+    private $reportSilent = false;
+    private $repeatTimeout = false;
     private $ignoredIPs;
     private $ignoredAgentsPattern;
     private $ignoredUrlsPattern;
@@ -71,24 +70,33 @@ class Notifier
      * @param string          $cacheDir   cacheDir
      * @param array           $config     configure array
      */
-    public function __construct(Swift_Mailer $mailer, EngineInterface $templating, $cacheDir, $config)
-    {
-        $this->mailer                = $mailer;
-        $this->templating            = $templating;
-        $this->from                  = $config['from'];
-        $this->to                    = $config['to'];
-        $this->handle404             = $config['handle404'];
-        $this->handleHTTPcodes       = $config['handleHTTPcodes'];
-        $this->reportErrors          = $config['handlePHPErrors'];
-        $this->reportWarnings        = $config['handlePHPWarnings'];
-        $this->reportSilent          = $config['handleSilentErrors'];
-        $this->ignoredClasses        = $config['ignoredClasses'];
-        $this->ignoredPhpErrors      = $config['ignoredPhpErrors'];
-        $this->repeatTimeout         = $config['repeatTimeout'];
-        $this->errorsDir             = $cacheDir . '/errors';
-        $this->ignoredIPs            = $config['ignoredIPs'];
-        $this->ignoredAgentsPattern  = $config['ignoredAgentsPattern'];
-        $this->ignoredUrlsPattern    = $config['ignoredUrlsPattern'];
+    public function __construct(Swift_Mailer $mailer, EngineInterface $templating, $cacheDir, $config) {
+        $default = [
+            'ignoredClasses' => [],
+            'ignoredPhpErrors' => [],
+            'ignoredIPs' => [],
+            'ignoredAgentsPattern' => [],
+            'ignoredUrlsPattern' => [],
+            'filteredRequestParams' => []
+        ];
+        $config = array_merge($default, $config);
+
+        $this->mailer = $mailer;
+        $this->templating = $templating;
+        $this->from = $config['from'];
+        $this->to = $config['to'];
+        $this->handle404 = $config['handle404'];
+        $this->handleHTTPcodes = $config['handleHTTPcodes'];
+        $this->reportErrors = $config['handlePHPErrors'];
+        $this->reportWarnings = $config['handlePHPWarnings'];
+        $this->reportSilent = $config['handleSilentErrors'];
+        $this->ignoredClasses = $config['ignoredClasses'];
+        $this->ignoredPhpErrors = $config['ignoredPhpErrors'];
+        $this->repeatTimeout = $config['repeatTimeout'];
+        $this->errorsDir = $cacheDir . '/errors';
+        $this->ignoredIPs = $config['ignoredIPs'];
+        $this->ignoredAgentsPattern = $config['ignoredAgentsPattern'];
+        $this->ignoredUrlsPattern = $config['ignoredUrlsPattern'];
         $this->filteredRequestParams = $config['filteredRequestParams'];
 
         if (!is_dir($this->errorsDir)) {
@@ -101,8 +109,7 @@ class Notifier
      *
      * @param GetResponseForExceptionEvent $event event
      */
-    public function onKernelException(GetResponseForExceptionEvent $event)
-    {
+    public function onKernelException(GetResponseForExceptionEvent $event) {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
         }
@@ -143,8 +150,7 @@ class Notifier
      *
      * @param ConsoleExceptionEvent $event event
      */
-    public function onConsoleException(ConsoleExceptionEvent $event)
-    {
+    public function onConsoleException(ConsoleExceptionEvent $event) {
         $exception = $event->getException();
 
         $sendMail = !in_array(get_class($exception), $this->ignoredClasses);
@@ -164,8 +170,7 @@ class Notifier
      *
      * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
      */
-    public function onKernelRequest(GetResponseEvent $event)
-    {
+    public function onKernelRequest(GetResponseEvent $event) {
         if ($this->reportErrors || $this->reportWarnings) {
             self::_reserveMemory();
 
@@ -178,11 +183,10 @@ class Notifier
     /**
      * @param ConsoleCommandEvent $event
      */
-    public function onConsoleCommand(ConsoleCommandEvent $event)
-    {
+    public function onConsoleCommand(ConsoleCommandEvent $event) {
         $this->request = null;
 
-        $this->command      = $event->getCommand();
+        $this->command = $event->getCommand();
         $this->commandInput = $event->getInput();
 
         if ($this->reportErrors || $this->reportWarnings) {
@@ -192,8 +196,7 @@ class Notifier
         }
     }
 
-    protected function setErrorHandlers()
-    {
+    protected function setErrorHandlers() {
         // set_error_handler and register_shutdown_function can be triggered on
         // both warnings and errors
         set_error_handler(array($this, 'handlePhpError'), E_ALL);
@@ -216,8 +219,7 @@ class Notifier
      * @return bool
      * @throws ErrorException
      */
-    public function handlePhpError($level, $message, $file, $line, $errcontext = null)
-    {
+    public function handlePhpError($level, $message, $file, $line, $errcontext = null) {
         // don't catch error with error_repoting is 0
         if (0 === error_reporting() && false === $this->reportSilent) {
             return false;
@@ -247,8 +249,7 @@ class Notifier
      * @see http://php.net/register_shutdown_function
      * Use this shutdown function to see if there were any errors
      */
-    public function handlePhpFatalErrorAndWarnings()
-    {
+    public function handlePhpFatalErrorAndWarnings() {
         self::_freeMemory();
 
         $lastError = error_get_last();
@@ -280,25 +281,24 @@ class Notifier
      *
      * @return string
      */
-    public function getErrorString($errorNo)
-    {
+    public function getErrorString($errorNo) {
         // may be exhaustive, but not sure
         $errorStrings = array(
-            E_WARNING           => 'Warning',
-            E_NOTICE            => 'Notice',
-            E_USER_ERROR        => 'User Error',
-            E_USER_WARNING      => 'User Warning',
-            E_USER_NOTICE       => 'User Notice',
-            E_STRICT            => 'Runtime Notice (E_STRICT)',
+            E_WARNING => 'Warning',
+            E_NOTICE => 'Notice',
+            E_USER_ERROR => 'User Error',
+            E_USER_WARNING => 'User Warning',
+            E_USER_NOTICE => 'User Notice',
+            E_STRICT => 'Runtime Notice (E_STRICT)',
             E_RECOVERABLE_ERROR => 'Catchable Fatal Error',
-            E_DEPRECATED        => 'Deprecated',
-            E_USER_DEPRECATED   => 'User Deprecated',
-            E_ERROR             => 'Error',
-            E_PARSE             => 'Parse Error',
-            E_CORE_ERROR        => 'E_CORE_ERROR',
-            E_COMPILE_ERROR     => 'E_COMPILE_ERROR',
-            E_CORE_WARNING      => 'E_CORE_WARNING',
-            E_COMPILE_WARNING   => 'E_COMPILE_WARNING',
+            E_DEPRECATED => 'Deprecated',
+            E_USER_DEPRECATED => 'User Deprecated',
+            E_ERROR => 'Error',
+            E_PARSE => 'Parse Error',
+            E_CORE_ERROR => 'E_CORE_ERROR',
+            E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+            E_CORE_WARNING => 'E_CORE_WARNING',
+            E_COMPILE_WARNING => 'E_COMPILE_WARNING',
         );
 
         return array_key_exists($errorNo, $errorStrings) ? $errorStrings[$errorNo] : 'UNKNOWN';
@@ -311,8 +311,7 @@ class Notifier
      * @param Command        $command
      * @param InputInterface $commandInput
      */
-    public function createMailAndSend($exception, Request $request = null, $context = null, Command $command = null, InputInterface $commandInput = null)
-    {
+    public function createMailAndSend($exception, Request $request = null, $context = null, Command $command = null, InputInterface $commandInput = null) {
         if (!$exception instanceof FlattenException) {
             if ($exception instanceof \Error) {
                 $exception = new \ErrorException(
@@ -332,12 +331,12 @@ class Notifier
         }
 
         $body = $this->templating->render('BrotherErrorNotifierBundle::mail.html.twig', array(
-            'exception'       => $exception,
-            'request'         => $request ? $this->filterRequest($request): null,
-            'status_code'     => $exception->getCode(),
-            'context'         => $context,
-            'command'         => $command,
-            'command_input'   => $commandInput,
+            'exception' => $exception,
+            'request' => $request ? $this->filterRequest($request) : null,
+            'status_code' => $exception->getCode(),
+            'context' => $context,
+            'command' => $command,
+            'command_input' => $commandInput,
         ));
 
         if ($this->request) {
@@ -369,10 +368,10 @@ class Notifier
      * defined in the filterList with stars.
      *
      * @param Request $request
+     *
      * @return Request $request
      */
-    private function filterRequest(Request $request)
-    {
+    private function filterRequest(Request $request) {
         if (count($this->filteredRequestParams) === 0) {
             return $request;
         }
@@ -414,9 +413,8 @@ class Notifier
      *
      * @return bool
      */
-    private function checkRepeat(FlattenException $exception)
-    {
-        $key  = md5($exception->getMessage() . ':' . $exception->getLine() . ':' . $exception->getFile());
+    private function checkRepeat(FlattenException $exception) {
+        $key = md5($exception->getMessage() . ':' . $exception->getLine() . ':' . $exception->getFile());
         $file = $this->errorsDir . '/' . $key;
         $time = is_file($file) ? file_get_contents($file) : 0;
         if ($time < time()) {
@@ -431,13 +429,11 @@ class Notifier
     /**
      * This allows to catch memory limit fatal errors.
      */
-    protected static function _reserveMemory()
-    {
+    protected static function _reserveMemory() {
         self::$tmpBuffer = str_repeat('x', 1024 * 500);
     }
 
-    protected static function _freeMemory()
-    {
+    protected static function _freeMemory() {
         self::$tmpBuffer = '';
     }
 }
