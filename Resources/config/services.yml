@@ -16,7 +16,7 @@ services:
             - "%kernel.cache_dir%"
             - "%brother.error_notifier.config%"
     brother.error_notifier.dumpy_extension:
-        class: "Brother\ErrorNotifierBundle\Twig\DumpyTwigFilter"
+        class: Brother\ErrorNotifierBundle\Twig\DumpyTwigFilter
         tags:
-            - { name:"twig.extension" }
+            - { name: "twig.extension" }
 
