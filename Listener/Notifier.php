@@ -75,8 +75,8 @@ class Notifier {
             'ignoredClasses' => [],
             'ignoredPhpErrors' => [],
             'ignoredIPs' => [],
-            'ignoredAgentsPattern' => [],
-            'ignoredUrlsPattern' => [],
+            'ignoredAgentsPattern' => '',
+            'ignoredUrlsPattern' => '',
             'filteredRequestParams' => []
         ];
         $config = array_merge($default, $config);
