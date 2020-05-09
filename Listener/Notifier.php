@@ -197,6 +197,10 @@ class Notifier {
     }
 
     protected function setErrorHandlers() {
+
+        if ($_SERVER['SCRIPT_NAME'] == './bin/phpunit') {
+            return;
+        }
         // set_error_handler and register_shutdown_function can be triggered on
         // both warnings and errors
         set_error_handler(array($this, 'handlePhpError'), E_ALL);
@@ -330,14 +334,14 @@ class Notifier {
             return;
         }
 
-        $body = $this->templating->render('BrotherErrorNotifierBundle::mail.html.twig', array(
+        $body = $this->templating->render('BrotherErrorNotifierBundle::mail.html.twig', [
             'exception' => $exception,
             'request' => $request ? $this->filterRequest($request) : null,
             'status_code' => $exception->getCode(),
             'context' => $context,
             'command' => $command,
             'command_input' => $commandInput,
-        ));
+        ]);
 
         if ($this->request) {
             $subject = '[' . $request->headers->get('host') . '] Error ' . $exception->getStatusCode() . ': ' . $exception->getMessage();
