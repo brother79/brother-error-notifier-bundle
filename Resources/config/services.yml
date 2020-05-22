@@ -12,7 +12,7 @@ services:
             - { name: "kernel.event_listener", event: "console.command", method: "onConsoleCommand", priority: "0" }
         arguments:
             - '@mailer'
-            - '@templating'
+            - '@twig'
             - "%kernel.cache_dir%"
             - "%brother.error_notifier.config%"
     brother.error_notifier.dumpy_extension:

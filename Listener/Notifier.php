@@ -22,6 +22,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\Templating\EngineInterface;
+use Twig\Environment;
 
 /**
  * Notifier
@@ -70,7 +71,7 @@ class Notifier {
      * @param string          $cacheDir   cacheDir
      * @param array           $config     configure array
      */
-    public function __construct(Swift_Mailer $mailer, EngineInterface $templating, $cacheDir, $config) {
+    public function __construct(Swift_Mailer $mailer, Environment $templating, $cacheDir, $config) {
         $default = [
             'ignoredClasses' => [],
             'ignoredPhpErrors' => [],
