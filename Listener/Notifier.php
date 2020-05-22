@@ -334,8 +334,8 @@ class Notifier {
         if ($this->repeatTimeout && $this->checkRepeat($exception)) {
             return;
         }
-
-        $body = $this->templating->render('BrotherErrorNotifierBundle::mail.html.twig', [
+//        @BundleName/directory/filename.html.twig
+        $body = $this->templating->render('@BrotherErrorNotifier/mail.html.twig', [
             'exception' => $exception,
             'request' => $request ? $this->filterRequest($request) : null,
             'status_code' => $exception->getCode(),
