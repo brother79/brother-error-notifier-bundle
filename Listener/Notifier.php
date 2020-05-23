@@ -115,7 +115,7 @@ class Notifier {
             return;
         }
 
-        $exception = $event->getException();
+        $exception = $event->getThrowable();
 
         if ($exception instanceof HttpException) {
             if (in_array($event->getRequest()->getClientIp(), $this->ignoredIPs)) {
@@ -334,7 +334,6 @@ class Notifier {
         if ($this->repeatTimeout && $this->checkRepeat($exception)) {
             return;
         }
-//        @BundleName/directory/filename.html.twig
         $body = $this->templating->render('@BrotherErrorNotifier/mail.html.twig', [
             'exception' => $exception,
             'request' => $request ? $this->filterRequest($request) : null,
