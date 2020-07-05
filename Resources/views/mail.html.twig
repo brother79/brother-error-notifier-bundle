@@ -603,7 +603,7 @@
                         <td>
                             <h4>Session Attributes</h4>
 
-                            {% if request.session.all|length %}
+                            {% if request.session and request.session.all|length %}
                                 <table>
                                     <tr>
                                         <th>Key</th>
