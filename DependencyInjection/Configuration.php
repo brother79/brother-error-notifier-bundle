@@ -35,7 +35,7 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                     ->ifString()
                         ->then(function ($value) {
-                            return array($value);
+                            return [$value];
                         })
                     ->end()
                     ->isRequired()
@@ -47,7 +47,7 @@ class Configuration implements ConfigurationInterface
                     ->beforeNormalization()
                     ->ifString()
                         ->then(function ($value) {
-                            return array($value);
+                            return [$value];
                         })
                     ->end()
                     ->isRequired()

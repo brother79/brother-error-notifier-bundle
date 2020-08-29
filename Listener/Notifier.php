@@ -263,7 +263,7 @@ class Notifier {
             return;
         }
 
-        $errors = array();
+        $errors = [];
 
         if ($this->reportErrors) {
             $errors = array_merge($errors, array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR));

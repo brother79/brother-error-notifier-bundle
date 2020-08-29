@@ -48,12 +48,12 @@ class DumpyTwigFilter extends \Twig_Extension
 
     public function getFilters()
     {
-        $optionsForRaw = array('is_safe' => array('all')); // allows raw dumping (otherwise <pre> is encoded)
+        $optionsForRaw = array('is_safe' => ['all']); // allows raw dumping (otherwise <pre> is encoded)
 
         return array(
-            'pre'   => new \Twig_SimpleFilter('pre', array($this, 'pre'), $optionsForRaw),
-            'dump'  => new \Twig_SimpleFilter('dump', array($this, 'preDump'), $optionsForRaw),
-            'dumpy' => new \Twig_SimpleFilter('dumpy', array($this, 'preYamlDump'), $optionsForRaw),
+            'pre'   => new \Twig_SimpleFilter('pre', [$this, 'pre'], $optionsForRaw),
+            'dump'  => new \Twig_SimpleFilter('dump', [$this, 'preDump'], $optionsForRaw),
+            'dumpy' => new \Twig_SimpleFilter('dumpy', [$this, 'preYamlDump'], $optionsForRaw),
         );
     }
 
@@ -154,12 +154,12 @@ class DumpyTwigFilter extends \Twig_Extension
 
                 return $classInfo;
             } else { // Get all accessors and their values
-                $data          = array();
+                $data          = [];
                 $data['class'] = '<span title="' . $class->getName() . '">' . $class->getShortName() . '</span>';
                 if ($class->isIterateable()) {
                     $data['iterateable'] = $this->sanitizeIterateable($value, $maxRecursionDepth, $recursionDepth);
                 } else {
-                    $data['accessors'] = array();
+                    $data['accessors'] = [];
                     foreach ($class->getMethods() as $method) {
                         if ($method->isPublic() && preg_match(self::METHOD_IS_ACCESSOR_REGEX, $method->getName())) {
                             $methodInfo = $method->getName() . '(';
@@ -215,7 +215,7 @@ class DumpyTwigFilter extends \Twig_Extension
     public function sanitizeIterateable($value, $maxRecursionDepth = self::MAX_DEPTH, $recursionDepth = 0)
     {
         if ($recursionDepth < $maxRecursionDepth) {
-            $r          = array();
+            $r          = [];
             $arrayCount = count($value);
             $count      = 0;
 
