@@ -66,10 +66,10 @@ class Notifier {
     /**
      * The constructor
      *
-     * @param Swift_Mailer    $mailer     mailer
-     * @param EngineInterface $templating templating
-     * @param string          $cacheDir   cacheDir
-     * @param array           $config     configure array
+     * @param Swift_Mailer $mailer     mailer
+     * @param Environment  $templating templating
+     * @param string       $cacheDir   cacheDir
+     * @param array        $config     configure array
      */
     public function __construct(Swift_Mailer $mailer, Environment $templating, $cacheDir, $config) {
         $default = [
