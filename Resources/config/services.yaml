@@ -1,7 +1,9 @@
 parameters:
     brother.error_notifier.listener.class: "Brother\ErrorNotifierBundle\Listener\Notifier"
+    brother.error_notifier.config: "1"
 services:
     brother.error_notifier.listener:
+        public: true
         class: "%brother.error_notifier.listener.class%"
         tags:
             - { name: "kernel.event_listener", event: "kernel.exception", method: "onKernelException", priority: "0" }
@@ -17,3 +19,4 @@ services:
         class: "Brother\ErrorNotifierBundle\Twig\DumpyTwigFilter"
         tags:
             - { name:"twig.extension" }
+
