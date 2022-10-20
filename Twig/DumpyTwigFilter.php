@@ -10,7 +10,13 @@
 namespace Brother\ErrorNotifierBundle\Twig;
 
 use Brother\ErrorNotifierBundle\Exception\InvokerException;
+use DateTime;
+use Exception;
+use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\Yaml\Dumper as YamlDumper;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
 /**
  * Extends Twig with
@@ -36,7 +42,7 @@ use Symfony\Component\Yaml\Dumper as YamlDumper;
  *
  * @author Goutte
  */
-class DumpyTwigFilter extends \Twig_Extension
+class DumpyTwigFilter extends AbstractExtension
 {
     /** @const INLINE : default value for the inline parameter of the YAML dumper aka the expanding-level */
     const INLINE = 3;
@@ -51,9 +57,9 @@ class DumpyTwigFilter extends \Twig_Extension
         $optionsForRaw = array('is_safe' => ['all']); // allows raw dumping (otherwise <pre> is encoded)
 
         return array(
-            'pre'   => new \Twig_SimpleFilter('pre', [$this, 'pre'], $optionsForRaw),
-            'dump'  => new \Twig_SimpleFilter('dump', [$this, 'preDump'], $optionsForRaw),
-            'dumpy' => new \Twig_SimpleFilter('dumpy', [$this, 'preYamlDump'], $optionsForRaw),
+            'pre'   => new TwigFilter('pre', [$this, 'pre'], $optionsForRaw),
+            'dump'  => new TwigFilter('dump', [$this, 'preDump'], $optionsForRaw),
+            'dumpy' => new TwigFilter('dumpy', [$this, 'preYamlDump'], $optionsForRaw),
         );
     }
 
@@ -67,6 +73,12 @@ class DumpyTwigFilter extends \Twig_Extension
         return $this->pre(print_r($values, 1));
     }
 
+    /**
+     * @param $values
+     * @param $depth
+     * @return string
+     * @throws ReflectionException
+     */
     public function preYamlDump($values, $depth = self::MAX_DEPTH)
     {
         return $this->pre($this->yamlDump($values, $depth));
@@ -95,9 +107,10 @@ class DumpyTwigFilter extends \Twig_Extension
      * Returns a templating-helper dump of depth-sanitized var as yaml string
      *
      * @param mixed $value What to dump
-     * @param int   $depth Recursion max depth
+     * @param int $depth Recursion max depth
      *
      * @return string
+     * @throws ReflectionException
      */
     public function yamlDump($value, $depth = self::MAX_DEPTH)
     {
@@ -111,9 +124,10 @@ class DumpyTwigFilter extends \Twig_Extension
      *
      * @param $value
      * @param int $maxRecursionDepth The maximum depth of recursion
-     * @param int $recursionDepth    The depth of recursion (used internally)
+     * @param int $recursionDepth The depth of recursion (used internally)
      *
      * @return array|string
+     * @throws ReflectionException
      */
     public function sanitize($value, $maxRecursionDepth = self::MAX_DEPTH, $recursionDepth = 0)
     {
@@ -130,7 +144,7 @@ class DumpyTwigFilter extends \Twig_Extension
         }
 
         if (is_object($value)) {
-            $class = new \ReflectionClass(get_class($value));
+            $class = new ReflectionClass(get_class($value));
 
             if ($recursionDepth >= $maxRecursionDepth) { // We're full, just scrap the vital data
                 $classInfo = $class->getName();
@@ -144,11 +158,11 @@ class DumpyTwigFilter extends \Twig_Extension
                 if ($class->hasMethod('__toString')) { // robustness, we don't care about perf
                     try {
                         $classInfo .= ' ' . (string) $value;
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         $classInfo .= '(string) casting throws Exception, please report or fix';
                     }
                 }
-                if ($value instanceof \DateTime) {
+                if ($value instanceof DateTime) {
                     $classInfo .= ' : ' . $value->format('Y-m-d H:i:s');
                 }
 
@@ -171,7 +185,7 @@ class DumpyTwigFilter extends \Twig_Extension
                                 try {
                                     $methodValue                    = $method->invoke($value);
                                     $data['accessors'][$methodInfo] = $this->sanitize($methodValue, $maxRecursionDepth, $recursionDepth + 1);
-                                } catch (\Exception $e) {
+                                } catch (Exception $e) {
                                     $data['accessors'][$methodInfo] = $this->sanitize(new InvokerException('Couldn\'t invoke method: Exception "' . get_class($e) . '" with message "' . $e->getMessage() . '"'), $maxRecursionDepth, $recursionDepth + 1);
                                 }
                             } else { // Get only method name and its params
@@ -212,6 +226,9 @@ class DumpyTwigFilter extends \Twig_Extension
         return $value;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function sanitizeIterateable($value, $maxRecursionDepth = self::MAX_DEPTH, $recursionDepth = 0)
     {
         if ($recursionDepth < $maxRecursionDepth) {
