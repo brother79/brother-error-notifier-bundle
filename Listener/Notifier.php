@@ -27,7 +27,8 @@ use Twig\Environment;
 /**
  * Notifier
  */
-class Notifier {
+class Notifier
+{
     /**
      * @var Swift_Mailer
      */
@@ -66,12 +67,13 @@ class Notifier {
     /**
      * The constructor
      *
-     * @param Swift_Mailer $mailer     mailer
-     * @param Environment  $templating templating
-     * @param string       $cacheDir   cacheDir
-     * @param array        $config     configure array
+     * @param Swift_Mailer $mailer mailer
+     * @param TwigEngine $templating templating
+     * @param string $cacheDir cacheDir
+     * @param array $config configure array
      */
-    public function __construct(Swift_Mailer $mailer, Environment $templating, $cacheDir, $config) {
+    public function __construct(Swift_Mailer $mailer, Environment $templating, $cacheDir, $config)
+    {
         $default = [
             'ignoredClasses' => [],
             'ignoredPhpErrors' => [],
@@ -110,7 +112,8 @@ class Notifier {
      *
      * @param GetResponseForExceptionEvent $event event
      */
-    public function onKernelException(GetResponseForExceptionEvent $event) {
+    public function onKernelException(GetResponseForExceptionEvent $event)
+    {
         if (HttpKernelInterface::MASTER_REQUEST !== $event->getRequestType()) {
             return;
         }
@@ -151,7 +154,8 @@ class Notifier {
      *
      * @param ConsoleExceptionEvent $event event
      */
-    public function onConsoleException(ConsoleExceptionEvent $event) {
+    public function onConsoleException(ConsoleExceptionEvent $event)
+    {
         $exception = $event->getException();
 
         $sendMail = !in_array(get_class($exception), $this->ignoredClasses);
@@ -171,7 +175,8 @@ class Notifier {
      *
      * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
      */
-    public function onKernelRequest(GetResponseEvent $event) {
+    public function onKernelRequest(GetResponseEvent $event)
+    {
         if ($this->reportErrors || $this->reportWarnings) {
             self::_reserveMemory();
 
@@ -184,7 +189,8 @@ class Notifier {
     /**
      * @param ConsoleCommandEvent $event
      */
-    public function onConsoleCommand(ConsoleCommandEvent $event) {
+    public function onConsoleCommand(ConsoleCommandEvent $event)
+    {
         $this->request = null;
 
         $this->command = $event->getCommand();
@@ -197,7 +203,8 @@ class Notifier {
         }
     }
 
-    protected function setErrorHandlers() {
+    protected function setErrorHandlers()
+    {
 
         if ($_SERVER['SCRIPT_NAME'] == './bin/phpunit') {
             return;
@@ -216,15 +223,16 @@ class Notifier {
     /**
      * @see http://php.net/set_error_handler
      *
-     * @param int    $level
+     * @param int $level
      * @param string $message
      * @param string $file
-     * @param int    $line
+     * @param int $line
      *
      * @return bool
      * @throws ErrorException
      */
-    public function handlePhpError($level, $message, $file, $line, $errcontext = null) {
+    public function handlePhpError($level, $message, $file, $line, $errcontext = null)
+    {
         // don't catch error with error_repoting is 0
         if (0 === error_reporting() && false === $this->reportSilent) {
             return false;
@@ -254,7 +262,8 @@ class Notifier {
      * @see http://php.net/register_shutdown_function
      * Use this shutdown function to see if there were any errors
      */
-    public function handlePhpFatalErrorAndWarnings() {
+    public function handlePhpFatalErrorAndWarnings()
+    {
         self::_freeMemory();
 
         $lastError = error_get_last();
@@ -286,7 +295,8 @@ class Notifier {
      *
      * @return string
      */
-    public function getErrorString($errorNo) {
+    public function getErrorString($errorNo)
+    {
         // may be exhaustive, but not sure
         $errorStrings = array(
             E_WARNING => 'Warning',
@@ -310,13 +320,14 @@ class Notifier {
     }
 
     /**
-     * @param \Throwable     $exception
-     * @param Request        $request
-     * @param array          $context
-     * @param Command        $command
+     * @param \Throwable $exception
+     * @param Request $request
+     * @param array $context
+     * @param Command $command
      * @param InputInterface $commandInput
      */
-    public function createMailAndSend($exception, Request $request = null, $context = null, Command $command = null, InputInterface $commandInput = null) {
+    public function createMailAndSend($exception, Request $request = null, $context = null, Command $command = null, InputInterface $commandInput = null)
+    {
         if (!$exception instanceof FlattenException) {
             if ($exception instanceof \Error) {
                 $exception = new \ErrorException(
@@ -375,7 +386,8 @@ class Notifier {
      *
      * @return Request $request
      */
-    private function filterRequest(Request $request) {
+    private function filterRequest(Request $request)
+    {
         if (count($this->filteredRequestParams) === 0) {
             return $request;
         }
@@ -417,7 +429,8 @@ class Notifier {
      *
      * @return bool
      */
-    private function checkRepeat(FlattenException $exception) {
+    private function checkRepeat(FlattenException $exception)
+    {
         $key = md5($exception->getMessage() . ':' . $exception->getLine() . ':' . $exception->getFile());
         $file = $this->errorsDir . '/' . $key;
         $time = is_file($file) ? file_get_contents($file) : 0;
@@ -433,11 +446,13 @@ class Notifier {
     /**
      * This allows to catch memory limit fatal errors.
      */
-    protected static function _reserveMemory() {
+    protected static function _reserveMemory()
+    {
         self::$tmpBuffer = str_repeat('x', 1024 * 500);
     }
 
-    protected static function _freeMemory() {
+    protected static function _freeMemory()
+    {
         self::$tmpBuffer = '';
     }
 }
