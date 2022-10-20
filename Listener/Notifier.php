@@ -68,7 +68,7 @@ class Notifier
      * The constructor
      *
      * @param Swift_Mailer $mailer mailer
-     * @param TwigEngine $templating templating
+     * @param Environment $templating templating
      * @param string $cacheDir cacheDir
      * @param array $config configure array
      */
